@@ -6,17 +6,18 @@ const bodyParser = require("body-parser");
 
 // loading env variables
 dotenv.config();
-// to do - mongodb connection file
-// const db = require("./db");
+
+require("./db");
 
 const app = express();
 
+// using cors for cross origin requests
 app.use(require("cors")());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// to do add routes
-//app.use("/v1", require("./routes"));
+// loading routes
+app.use("/v1", require("./routes"));
 
 // 404 route not found
 app.use((req, res, next) => {

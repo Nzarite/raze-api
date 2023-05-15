@@ -5,11 +5,11 @@ const router = express.Router();
 const { UserController } = require("../controller");
 
 router.get("/", UserController.getAllUsers);
-router.get("/permissions", UserController.getUserPermissions);
+router.get("/permissions/:id", UserController.getUserPermissions);
 router.get("/:id", UserController.getUserById);
 router.get("/:email", UserController.getAllUsers);
-router.post("/add", UserController.addUser);
-router.put("/edit/:id", UserController.editUser);
-router.delete("/delete/:id", UserController.deleteUser);
+router.post("/", UserController.addUser);
+router.put("/:id", UserController.editUser);
+router.delete("/:id", UserController.deleteUser);
 
 module.exports = router;

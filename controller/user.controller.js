@@ -17,8 +17,12 @@ UserController.getAllUsers = async (req, res, next) => {
 
 UserController.getUserPermissions = async (req, res, next) => {
   try {
-    const users = await User.find({});
-    res.json(users);
+    const id = new ObjectId(req.params.id);
+    const user = await User.findOne({ _id: id, isActive: true });
+    if (!user) {
+      return res.json("User not found/deleted");
+    }
+    res.json({ permissions: user.permissions });
   } catch (err) {
     next(err);
   }
@@ -83,8 +87,33 @@ UserController.deleteUser = async (req, res, next) => {
   }
 };
 
-UserController.editUser = (req, res, next) => {
+UserController.editUser = async (req, res, next) => {
   try {
+    const id = new ObjectId(req.params.id);
+    const user = await User.findOne({ _id: id, isActive: true });
+    if (!user) {
+      return res.json("User not found/deleted");
+    }
+    const { user: userPayload } = req.body;
+    const userRoles = await UserRole.find({}).sort({ priority: -1 });
+
+    const { _id: userRoleId, priority: userRolePriorty } =
+      userRoles.find(
+        ({ role }) =>
+          role.toLowerCase() === userPayload.role.toLowerCase(),
+      );
+
+    const userPermissions = [];
+    for (let userRole of userRoles) {
+      if (userRole.priority <= userRolePriorty) {
+        userPermissions.push(...userRole.permissions);
+      }
+    }
+
+    user.permissions = userPermissions;
+    user.role = userRoleId;
+    await user.save();
+    res.json(user);
   } catch (err) {
     next(err);
   }
